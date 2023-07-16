@@ -10,25 +10,25 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
-    private final UserService userService;
     private final UserStorage userStorage;
 
     @Override
     public ItemDto addNewItem(ItemDto itemDto, long userId) {
-        userService.getUserById(userId);
+        User user = userStorage.getUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
+        item.setOwner(user);
+        userStorage.getUserById(userId);
         return ItemMapper.toItemDto(itemStorage.addNewItem(item, userId));
     }
 
@@ -56,15 +56,12 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItemById(long itemId) {
         Item item = itemStorage.getItemById(itemId);
-        if (item == null) {
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена");
-        }
         return ItemMapper.toItemDto(item);
     }
 
     @Override
     public Collection<ItemDto> getAllItemsByUserId(long userId) {
-        userService.getUserById(userId);
+        userStorage.getUserById(userId);
         Collection<ItemDto> itemsDto = new ArrayList<>();
         for (Item allItem : itemStorage.getAllItemsByUserId(userId)) {
             itemsDto.add(ItemMapper.toItemDto(allItem));
@@ -74,13 +71,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> searchItemByText(String text) {
-        if (text.isBlank()) {
-            return List.of();
-        }
-        List<ItemDto> items = new ArrayList<>();
-        for (Item item : itemStorage.searchItemByText(text)) {
-            items.add(ItemMapper.toItemDto(item));
-        }
-        return items;
+        Collection<Item> items = itemStorage.searchItemByText(text);
+        return items.stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 }

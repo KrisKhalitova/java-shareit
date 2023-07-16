@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,7 +19,6 @@ public class ItemDto {
     private String name;
     @NotBlank
     private String description;
-    private User owner;
     @NotNull
     private Boolean available;
 }

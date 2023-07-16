@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -20,7 +20,6 @@ public class ItemStorageImpl implements ItemStorage {
 
     private final HashMap<Long, Item> items = new HashMap<>();
     private long itemId = 1;
-    private final UserStorage userStorage;
 
     @Override
     public Item addNewItem(Item item, long userId) {
@@ -28,8 +27,6 @@ public class ItemStorageImpl implements ItemStorage {
             log.warn("Вещь {} уже существует", item);
             throw new ValidationException(HttpStatus.BAD_REQUEST, "Вещь уже существует");
         }
-        User user = userStorage.getUserById(userId);
-        item.setOwner(user);
         item.setId(itemId++);
         items.put(item.getId(), item);
         log.info("Новая вещь {} добавлена", item);
@@ -45,6 +42,9 @@ public class ItemStorageImpl implements ItemStorage {
 
     @Override
     public Item getItemById(long itemId) {
+        if (items.get(itemId) == null) {
+            throw new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена");
+        }
         return items.get(itemId);
     }
 
@@ -61,13 +61,12 @@ public class ItemStorageImpl implements ItemStorage {
 
     @Override
     public Collection<Item> searchItemByText(String text) {
-        Collection<Item> itemList = new ArrayList<>();
-        for (Item item : items.values()) {
-            if ((item.getName().toLowerCase().contains(text) || item.getDescription().toLowerCase().contains(text))
-                    && item.getAvailable()) {
-                itemList.add(item);
-            }
+        if (text == null || text.isBlank()) {
+            return List.of();
         }
-        return itemList;
+        return items.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(Item::getAvailable).collect(Collectors.toList());
     }
 }

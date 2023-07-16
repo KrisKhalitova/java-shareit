@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.EmailException;
-import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
@@ -34,8 +33,8 @@ public class UserStorageImpl implements UserStorage {
     }
 
     @Override
-    public User updateUser(User userUpdated) {
-        User user = users.get(userUpdated.getId());
+    public User updateUser(User userUpdated, long id) {
+        User user = users.get(id);
         if (userUpdated.getName() != null && !userUpdated.getName().isEmpty()) {
             user.setName(userUpdated.getName());
         }
@@ -54,6 +53,9 @@ public class UserStorageImpl implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
+        if (users.get(userId) == null) {
+            throw new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+        }
         return users.get(userId);
     }
 
@@ -69,17 +71,6 @@ public class UserStorageImpl implements UserStorage {
     }
 
     private Boolean checkEmail(String email) {
-        for (User value : users.values()) {
-            if (value.getEmail().equals(email)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void checkContainsUserId(long id) {
-        if (!users.containsKey(id)) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND, "Пользователь не найден");
-        }
+        return users.values().stream().anyMatch(user -> user.getEmail().equals(email));
     }
 }

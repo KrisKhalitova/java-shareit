@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.dto;
 import lombok.*;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @Getter
 @Setter
@@ -13,9 +13,9 @@ import javax.validation.constraints.NotNull;
 public class UserDto {
 
     private Long id;
-    @NotNull
+    @NotBlank
     private String name;
     @Email
-    @NotNull
+    @NotBlank
     private String email;
 }
