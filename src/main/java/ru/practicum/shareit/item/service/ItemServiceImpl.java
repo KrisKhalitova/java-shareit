@@ -28,7 +28,6 @@ public class ItemServiceImpl implements ItemService {
         User user = userStorage.getUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
-        userStorage.getUserById(userId);
         return ItemMapper.toItemDto(itemStorage.addNewItem(item, userId));
     }
 

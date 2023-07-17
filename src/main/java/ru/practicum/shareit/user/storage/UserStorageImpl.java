@@ -53,10 +53,11 @@ public class UserStorageImpl implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
-        if (users.get(userId) == null) {
+        User user = users.get(userId);
+        if (user == null) {
             throw new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
-        return users.get(userId);
+        return user;
     }
 
     @Override

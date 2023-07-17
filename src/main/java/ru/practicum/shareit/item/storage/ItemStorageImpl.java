@@ -42,10 +42,11 @@ public class ItemStorageImpl implements ItemStorage {
 
     @Override
     public Item getItemById(long itemId) {
-        if (items.get(itemId) == null) {
+        Item item = items.get(itemId);
+        if (item == null) {
             throw new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена");
         }
-        return items.get(itemId);
+        return item;
     }
 
     @Override
