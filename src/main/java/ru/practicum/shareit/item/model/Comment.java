@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity(name = "comments")
+@Table(name = "comments")
 @NoArgsConstructor
 public class Comment {
 
@@ -27,5 +28,6 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
+    @Column
     private LocalDateTime created;
 }
