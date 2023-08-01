@@ -14,4 +14,5 @@ public class CommentDto {
 
     @NotBlank
     private String text;
+
 }
