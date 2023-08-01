@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS items (
     description VARCHAR(256) NOT NULL,
     is_available BOOLEAN NOT NULL,
     owner_id LONG NOT NULL,
-    request_id LONG NOT NULL,
     CONSTRAINT fk_items_owner_id FOREIGN KEY (owner_id) REFERENCES users
                 ON DELETE CASCADE ON UPDATE CASCADE
 );
