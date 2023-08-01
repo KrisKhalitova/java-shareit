@@ -21,6 +21,7 @@ public class Item {
     private String name;
     @Column(length = 256)
     private String description;
+    @Column
     private Boolean available;
     @ManyToOne
     @JoinColumn(name = "owner_id")
