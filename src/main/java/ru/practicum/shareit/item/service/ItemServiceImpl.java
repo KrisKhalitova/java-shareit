@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
                 new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена"));
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-        if (updatedItem.getOwner().getId() != userId || user == null) {
+        if (!updatedItem.getOwner().getId().equals(userId) || user == null) {
             log.warn("Только собственник вещи может изменять информацию");
             throw new ValidationException(HttpStatus.NOT_FOUND, "Только собственник вещи может изменять информацию");
         }
@@ -82,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
         Collection<Comment> comments = commentRepository.findByItemId(itemId);
         Booking lastBooking = null;
         Booking nextBooking = null;
-        if (item.getOwner().getId() == userId) {
+        if (item.getOwner().getId().equals(userId)) {
             lastBooking = bookingRepository.findBookingByItemIdAndStartBefore(item.getId(), now, Sort.by("start").descending()).stream().findFirst().orElse(null);
             nextBooking = bookingRepository.findBookingByItemIdAndStartAfterAndStatus(item.getId(), now, BookingStatus.APPROVED, Sort.by("start")).stream().findFirst().orElse(null);
         }

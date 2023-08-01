@@ -43,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
                 new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена"));
         User user = userRepository.findById(bookerId).orElseThrow(() ->
                 new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-        if (item.getOwner().getId() == bookerId) {
+        if (item.getOwner().getId().equals(bookerId)) {
             throw new ValidationException(HttpStatus.NOT_FOUND, "Id владельца и пользователя не могут совпадать");
         }
         if (!item.getAvailable()) {
@@ -60,7 +60,7 @@ public class BookingServiceImpl implements BookingService {
     public ResponseBookingDto approveBooking(Long bookingId, boolean approved, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new ValidationException(HttpStatus.NOT_FOUND, "Бронирование не найдено"));
-        if (booking.getItem().getOwner().getId() != userId) {
+        if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new ValidationException(HttpStatus.NOT_FOUND, "Не совпадают id по бронированию");
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
@@ -75,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
     public ResponseBookingDto getBookingByBookingId(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new ValidationException(HttpStatus.NOT_FOUND, "Бронирование не найдено"));
-        if (booking.getBooker().getId() != userId && booking.getItem().getOwner().getId() != userId) {
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
             throw new ValidationException(HttpStatus.NOT_FOUND, "Несовпадение по бронированию");
         }
         return BookingMapper.toResponseBookingDto(booking);
