@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +103,7 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ResponseItemDto> getAllItemsByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-        List<Item> items = new ArrayList<>(itemRepository.findAllByOwnerOrderById(user));
+        List<Item> items = new ArrayList<>(itemRepository.findAllByOwner(user, Sort.by(ASC, "id")));
         List<ResponseItemDto> itemsDto = new ArrayList<>();
         for (int i = 0; i < items.size(); i++) {
             itemsDto.add(getItemById(items.get(i).getId(), userId));
@@ -117,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
         }
         return items.stream()
                 .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override

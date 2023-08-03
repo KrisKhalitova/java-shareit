@@ -9,16 +9,17 @@ import javax.persistence.*;
 @ToString
 @AllArgsConstructor
 @Builder
-@Entity(name = "users")
+@Entity
 @Table(name = "users")
 @NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-    @Column(length = 128)
+
+    @Column(name = "name", nullable = false)
     private String name;
-    @Column(unique = true, length = 64)
+
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 }

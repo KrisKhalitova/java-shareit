@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Entity(name = "bookings")
+@Entity
 @Table(name = "bookings")
 @Builder
 @AllArgsConstructor
