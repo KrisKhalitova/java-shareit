@@ -19,19 +19,22 @@ public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-    @Column(name = "start_date")
+
+    @Column(name = "start_date", nullable = false)
     private LocalDateTime start;
-    @Column(name = "end_date")
+
+    @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
-    @JoinColumn(name = "item_id")
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Item item;
-    @ManyToOne
-    @JoinColumn(name = "booker_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private User booker;
+
     @Enumerated(EnumType.STRING)
-    @Column
     private BookingStatus status;
 }
