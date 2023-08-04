@@ -17,4 +17,18 @@ public class ErrorHandler {
         log.error(e.getMessage(), e);
         return new ErrorResponse(UNSUPPORTED_STATUS, e.getMessage());
     }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ErrorResponse handleValidationException(ValidationException e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse("Ошибка в запросе", e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ErrorResponse handleNotFoundException(NotFoundException e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse("Ошибка в запросе", e.getMessage());
+    }
 }

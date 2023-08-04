@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.PostBookingDto;
@@ -14,6 +13,7 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ErrorHandler;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
@@ -40,17 +40,17 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public ResponseBookingDto addNewRequestForBooking(PostBookingDto bookingDto, Long bookerId) {
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена"));
+                new NotFoundException("Вещь не найдена"));
         User user = userRepository.findById(bookerId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         if (item.getOwner().getId().equals(bookerId)) {
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Id владельца и пользователя не могут совпадать");
+            throw new NotFoundException("Id владельца и пользователя не могут совпадать");
         }
         if (!item.getAvailable()) {
-            throw new ValidationException(HttpStatus.BAD_REQUEST, "Вещь не доступна к бронированию");
+            throw new ValidationException("Вещь не доступна к бронированию");
         }
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().isEqual(bookingDto.getEnd())) {
-            throw new ValidationException(HttpStatus.BAD_REQUEST, "Неверно введены параметры времени бронирования");
+            throw new ValidationException("Неверно введены параметры времени бронирования");
         }
         Booking booking = BookingMapper.toBooking(bookingDto, item, user);
         return BookingMapper.toResponseBookingDto(bookingRepository.save(booking));
@@ -58,13 +58,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public ResponseBookingDto approveBooking(Long bookingId, boolean approved, Long userId) {
+        userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь не найден"));
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Бронирование не найдено"));
+                new NotFoundException("Бронирование не найдено"));
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Не совпадают id по бронированию");
+            throw new NotFoundException("Не совпадают id по бронированию");
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidationException(HttpStatus.BAD_REQUEST, "Статус бронирования не 'В ожидании'");
+            throw new ValidationException("Статус бронирования не 'В ожидании'");
         }
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return BookingMapper.toResponseBookingDto(bookingRepository.save(booking));
@@ -73,10 +75,12 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public ResponseBookingDto getBookingByBookingId(Long bookingId, Long userId) {
+        userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь не найден"));
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Бронирование не найдено"));
+                new NotFoundException("Бронирование не найдено"));
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Несовпадение по бронированию");
+            throw new NotFoundException("Несовпадение по бронированию");
         }
         return BookingMapper.toResponseBookingDto(booking);
     }
@@ -85,7 +89,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Collection<ResponseBookingDto> getAllBookingsByUserIdByState(BookingState state, Long userId) {
         userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         List<Booking> bookingList;
         LocalDateTime localDateTime = LocalDateTime.now();
         switch (state) {
@@ -93,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingList = bookingRepository.findAllByBookerId(userId, SORT_BY_DESC);
                 break;
             case CURRENT:
-                bookingList = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId, localDateTime, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndDateTimeBetween(userId, localDateTime, SORT_BY_DESC);
                 break;
             case PAST:
                 bookingList = bookingRepository.findAllByBookerIdAndEndBefore(userId, localDateTime, SORT_BY_DESC);
@@ -107,10 +111,8 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookingList = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, SORT_BY_DESC);
                 break;
-            case UNSUPPORTED_STATUS:
-                throw new UnsupportedStatusException(HttpStatus.BAD_REQUEST, ErrorHandler.UNSUPPORTED_STATUS);
             default:
-                throw new UnsupportedStatusException(HttpStatus.BAD_REQUEST, ErrorHandler.UNSUPPORTED_STATUS);
+                throw new UnsupportedStatusException(ErrorHandler.UNSUPPORTED_STATUS);
         }
         return bookingList.stream()
                 .map(BookingMapper::toResponseBookingDto)
@@ -121,21 +123,21 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Collection<ResponseBookingDto> getAllBookingsByOwnerByState(BookingState state, Long ownerId) {
         userRepository.findById(ownerId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         List<Booking> bookingList;
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now();
         switch (state) {
             case ALL:
                 bookingList = bookingRepository.findAllByItemOwnerId(ownerId, SORT_BY_DESC);
                 break;
             case PAST:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, now, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, localDateTime, SORT_BY_DESC);
                 break;
             case CURRENT:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, now, now, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByOwnerIdAndDateTimeBetween(ownerId, localDateTime, SORT_BY_DESC);
                 break;
             case FUTURE:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, now, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, localDateTime, SORT_BY_DESC);
                 break;
             case WAITING:
                 bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, SORT_BY_DESC);
@@ -143,10 +145,8 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, SORT_BY_DESC);
                 break;
-            case UNSUPPORTED_STATUS:
-                throw new UnsupportedStatusException(HttpStatus.BAD_REQUEST, ErrorHandler.UNSUPPORTED_STATUS);
             default:
-                throw new UnsupportedStatusException(HttpStatus.BAD_REQUEST, ErrorHandler.UNSUPPORTED_STATUS);
+                throw new UnsupportedStatusException(ErrorHandler.UNSUPPORTED_STATUS);
         }
         return bookingList.stream()
                 .map(BookingMapper::toResponseBookingDto)

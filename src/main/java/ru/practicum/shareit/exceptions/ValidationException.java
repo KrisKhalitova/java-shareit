@@ -1,14 +1,11 @@
 package ru.practicum.shareit.exceptions;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
-public class ValidationException extends ResponseStatusException {
+public class ValidationException extends RuntimeException {
 
     private final String message;
 
-    public ValidationException(HttpStatus status, String message) {
-        super(status, message);
+    public ValidationException(String message) {
+        super(message);
         this.message = message;
     }
 

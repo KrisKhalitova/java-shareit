@@ -3,11 +3,11 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -45,8 +45,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto addNewItem(ItemDto itemDto, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-        user.setId(userId);
+                new NotFoundException("Пользователь не найден"));
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
         return ItemMapper.toItemDto(itemRepository.save(item));
@@ -55,12 +54,12 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItemById(ItemDto itemDto, Long itemId, Long userId) {
         Item updatedItem = itemRepository.findById(itemId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена"));
+                new NotFoundException("Вещь не найдена"));
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         if (!updatedItem.getOwner().getId().equals(userId) || user == null) {
             log.warn("Только собственник вещи может изменять информацию");
-            throw new ValidationException(HttpStatus.NOT_FOUND, "Только собственник вещи может изменять информацию");
+            throw new NotFoundException("Только собственник вещи может изменять информацию");
         }
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             updatedItem.setName(itemDto.getName());
@@ -78,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ResponseItemDto getItemById(Long itemId, Long userId) {
         userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         Item item = getItem(itemId, userId);
         LocalDateTime now = LocalDateTime.now();
         Collection<Comment> comments = commentRepository.findByItemId(itemId);
@@ -93,16 +92,16 @@ public class ItemServiceImpl implements ItemService {
 
     public Item getItem(Long itemId, Long userId) {
         userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден."));
+                new NotFoundException("Пользователь не найден."));
         return item;
     }
 
     @Override
     public Collection<ResponseItemDto> getAllItemsByUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                new NotFoundException("Пользователь не найден"));
         List<Item> items = new ArrayList<>(itemRepository.findAllByOwner(user, Sort.by(ASC, "id")));
         List<ResponseItemDto> itemsDto = new ArrayList<>();
         for (int i = 0; i < items.size(); i++) {
@@ -124,19 +123,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ResponseCommentDto addNewComment(CommentDto commentDto, Long itemId, Long userId) {
-        Comment comment = Comment.builder()
-                .text(commentDto.getText())
-                .build();
-        comment.setItem(itemRepository.findById(itemId).orElseThrow(() ->
-                new ValidationException(HttpStatus.NOT_FOUND, "Вещь не найдена")));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ValidationException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
-        comment.setAuthor(user);
-
-        if (!bookingRepository.existsByBookerIdAndEndBeforeAndStatus(userId, LocalDateTime.now(), BookingStatus.APPROVED)) {
-            throw new ValidationException(HttpStatus.BAD_REQUEST, "Отзыв не может быть создан");
+        if (!bookingRepository.existsByItemIdAndBookerIdAndEndBeforeAndStatus(itemId, userId, LocalDateTime.now(), BookingStatus.APPROVED)) {
+            throw new ValidationException("Отзыв не может быть создан");
         }
-        comment.setCreated(LocalDateTime.now());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("Вещь не найдена"));
+        LocalDateTime now = LocalDateTime.now();
+
+        Comment comment = CommentMapper.toComment(commentDto, item, user, now);
         log.info("Отзыв добавлен");
         return CommentMapper.toResponseCommentDto(commentRepository.save(comment));
     }
