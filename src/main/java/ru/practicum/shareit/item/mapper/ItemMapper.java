@@ -1,12 +1,19 @@
 package ru.practicum.shareit.item.mapper;
 
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+
+import java.util.Collection;
 
 public class ItemMapper {
 
     public static Item toItem(ItemDto itemDto) {
         return Item.builder()
+                .id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
@@ -14,11 +21,24 @@ public class ItemMapper {
     }
 
     public static ItemDto toItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable()
-        );
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .build();
+    }
+
+    public static ResponseItemDto toResponseItemDto(Item item, Booking last, Booking next, Collection<Comment> comments) {
+        return ResponseItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .lastBooking(BookingMapper.toBookingDtoWithBookerId(last))
+                .nextBooking(BookingMapper.toBookingDtoWithBookerId(next))
+                .owner(item.getOwner())
+                .comments(CommentMapper.toResponseCommentDtoList(comments))
+                .build();
     }
 }
