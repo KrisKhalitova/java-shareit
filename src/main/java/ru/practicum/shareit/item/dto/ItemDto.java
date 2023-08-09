@@ -23,4 +23,5 @@ public class ItemDto {
     private Boolean available;
     private User owner;
     private Item item;
+    private Long requestId;
 }

@@ -21,4 +21,5 @@ public class ResponseItemDto {
     private BookingDtoWithBookers nextBooking;
     private User owner;
     private List<ResponseCommentDto> comments;
+    private Long requestId;
 }

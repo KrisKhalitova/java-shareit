@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotNull;
@@ -18,4 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query(value = "select i from Item i where lower(i.name) like %:text% or lower(i.description) like %:text% " +
             "and i.available=true")
     List<Item> search(@Param("text") @NotNull String text);
+
+    List<Item> findAllByItemRequest(ItemRequest request);
 }

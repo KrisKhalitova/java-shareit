@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.ShareItPageRequest;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -87,29 +89,30 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ResponseBookingDto> getAllBookingsByUserIdByState(BookingState state, Long userId) {
+    public Collection<ResponseBookingDto> getAllBookingsByUserIdByState(BookingState state, Long userId, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
         List<Booking> bookingList;
         LocalDateTime localDateTime = LocalDateTime.now();
+        Pageable pageable = new ShareItPageRequest(from, size, SORT_BY_DESC);
         switch (state) {
             case ALL:
-                bookingList = bookingRepository.findAllByBookerId(userId, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerId(userId, pageable);
                 break;
             case CURRENT:
-                bookingList = bookingRepository.findAllByBookerIdAndDateTimeBetween(userId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndDateTimeBetween(userId, localDateTime, pageable);
                 break;
             case PAST:
-                bookingList = bookingRepository.findAllByBookerIdAndEndBefore(userId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndEndBefore(userId, localDateTime, pageable);
                 break;
             case FUTURE:
-                bookingList = bookingRepository.findAllByBookerIdAndStartAfter(userId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndStartAfter(userId, localDateTime, pageable);
                 break;
             case WAITING:
-                bookingList = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING, pageable);
                 break;
             case REJECTED:
-                bookingList = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
                 break;
             default:
                 throw new UnsupportedStatusException(ErrorHandler.UNSUPPORTED_STATUS);
@@ -121,29 +124,30 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ResponseBookingDto> getAllBookingsByOwnerByState(BookingState state, Long ownerId) {
+    public Collection<ResponseBookingDto> getAllBookingsByOwnerByState(BookingState state, Long ownerId, Integer from, Integer size) {
         userRepository.findById(ownerId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
         List<Booking> bookingList;
         LocalDateTime localDateTime = LocalDateTime.now();
+        Pageable pageable = new ShareItPageRequest(from, size, SORT_BY_DESC);
         switch (state) {
             case ALL:
-                bookingList = bookingRepository.findAllByItemOwnerId(ownerId, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerId(ownerId, pageable);
                 break;
             case PAST:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, localDateTime, pageable);
                 break;
             case CURRENT:
-                bookingList = bookingRepository.findAllByOwnerIdAndDateTimeBetween(ownerId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByOwnerIdAndDateTimeBetween(ownerId, localDateTime, pageable);
                 break;
             case FUTURE:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, localDateTime, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, localDateTime, pageable);
                 break;
             case WAITING:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, pageable);
                 break;
             case REJECTED:
-                bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, SORT_BY_DESC);
+                bookingList = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, pageable);
                 break;
             default:
                 throw new UnsupportedStatusException(ErrorHandler.UNSUPPORTED_STATUS);

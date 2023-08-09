@@ -3,11 +3,15 @@ package ru.practicum.shareit.item.mapper;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemMapper {
 
@@ -29,6 +33,16 @@ public class ItemMapper {
                 .build();
     }
 
+    public static ItemDto toItemRequestDto(Item item) {
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getItemRequest().getId())
+                .build();
+    }
+
     public static ResponseItemDto toResponseItemDto(Item item, Booking last, Booking next, Collection<Comment> comments) {
         return ResponseItemDto.builder()
                 .id(item.getId())
@@ -39,6 +53,24 @@ public class ItemMapper {
                 .nextBooking(BookingMapper.toBookingDtoWithBookerId(next))
                 .owner(item.getOwner())
                 .comments(CommentMapper.toResponseCommentDtoList(comments))
+                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
                 .build();
+    }
+
+    public static ItemRequestDto toItemForRequestDto(Item item) {
+        return ItemRequestDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getItemRequest().getId())
+                .build();
+    }
+
+    public static List<ItemRequestDto> toItemListForRequestDto(List<Item> items) {
+        if (items == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return items.stream().map(ItemMapper::toItemForRequestDto).collect(Collectors.toList());
     }
 }
