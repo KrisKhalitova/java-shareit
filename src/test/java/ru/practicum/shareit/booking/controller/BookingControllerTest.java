@@ -79,8 +79,8 @@ class BookingControllerTest {
     @Test
     void addNewRequestForBookingTestWithWrongStartTest() throws Exception {
         responseBookingDto.setStart(LocalDateTime.now().minusDays(365));
-        when(bookingService.addNewRequestForBooking(any(), anyLong())).
-                thenThrow(new ValidationException("Дата начала не может быть установлена в прошлом"));
+        when(bookingService.addNewRequestForBooking(any(), anyLong()))
+                .thenThrow(new ValidationException("Дата начала не может быть установлена в прошлом"));
 
         mvc.perform(post("/bookings")
                         .header(USER_ID_HEADER, 1)
@@ -92,8 +92,8 @@ class BookingControllerTest {
     @Test
     void addNewRequestForBookingTestWithWrongEndTest() throws Exception {
         responseBookingDto.setEnd(LocalDateTime.now().minusDays(365));
-        when(bookingService.addNewRequestForBooking(any(), anyLong())).
-                thenThrow(new ValidationException("Дата окончания не может быть установлена в прошлом"));
+        when(bookingService.addNewRequestForBooking(any(), anyLong()))
+                .thenThrow(new ValidationException("Дата окончания не может быть установлена в прошлом"));
 
         mvc.perform(post("/bookings")
                         .header(USER_ID_HEADER, 1)
@@ -104,8 +104,8 @@ class BookingControllerTest {
 
     @Test
     void addNewRequestForBookingTestWithWrongUserIdTest() throws Exception {
-        when(bookingService.addNewRequestForBooking(any(), anyLong())).
-                thenThrow(new NotFoundException("Пользователь не найден"));
+        when(bookingService.addNewRequestForBooking(any(), anyLong()))
+                .thenThrow(new NotFoundException("Пользователь не найден"));
 
         mvc.perform(post("/bookings")
                         .header(USER_ID_HEADER, 256)
