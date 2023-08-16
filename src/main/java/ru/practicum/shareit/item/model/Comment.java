@@ -25,11 +25,11 @@ public class Comment {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @JoinColumn(name = "item_id")
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @JoinColumn(name = "author_id")
     private User author;
 
     @Column(name = "created", nullable = false)
