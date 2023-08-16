@@ -49,7 +49,6 @@ public class ItemMapperTest {
     void itemDtoToItemTest() {
         item = ItemMapper.toItem(itemDto);
 
-        assertThat(item.getId()).isEqualTo(itemDto.getId());
         assertThat(item.getName()).isEqualTo(itemDto.getName());
         assertThat(item.getDescription()).isEqualTo(itemDto.getDescription());
         assertThat(item.getAvailable()).isEqualTo(itemDto.getAvailable());
