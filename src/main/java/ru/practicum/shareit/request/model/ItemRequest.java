@@ -27,6 +27,5 @@ public class ItemRequest {
     @JoinColumn(name = "requester_id")
     private User requester;
     @Column(name = "created", nullable = false)
-    //@CreationTimestamp
     private LocalDateTime created;
 }
