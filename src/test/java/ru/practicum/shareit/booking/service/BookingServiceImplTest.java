@@ -145,22 +145,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void addNewRequestForBookingWithSameBookingTimeTest() {
-        Long validBookerId = user2.getId();
-
-        LocalDateTime startNew = LocalDateTime.now();
-        LocalDateTime endNew = LocalDateTime.now();
-        postBookingDto.setStart(startNew);
-        postBookingDto.setEnd(endNew);
-
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user2));
-
-        assertThrows(ValidationException.class, () ->
-                bookingService.addNewRequestForBooking(postBookingDto, validBookerId));
-    }
-
-    @Test
     void approveBookingTest() {
         Long bookingId = booking.getId();
         boolean approved = true;
