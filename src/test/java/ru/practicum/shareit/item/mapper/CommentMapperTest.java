@@ -49,8 +49,8 @@ public class CommentMapperTest {
 
     @Test
     void commentDtoToCommentTest() {
-        CommentDto commentDto = new CommentDto(1L, "text", created, userDto, itemDto);
-        comment = CommentMapper.toComment(commentDto, item, user);
+        CommentDto commentDto = new CommentDto("text", created, userDto, itemDto);
+        comment = CommentMapper.toComment(commentDto, item, user, created);
 
         assertThat(comment.getText()).isEqualTo(commentDto.getText());
         assertThat(comment.getAuthor().getName()).isEqualTo(commentDto.getAuthor().getName());

@@ -110,7 +110,6 @@ class ItemServiceImplTest {
                 .created(LocalDateTime.now())
                 .build();
         commentDto = CommentDto.builder()
-                .id(comment.getId())
                 .text(comment.getText())
                 .author(userDto2)
                 .item(itemDto)

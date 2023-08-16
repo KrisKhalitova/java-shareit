@@ -141,7 +141,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь не найдена"));
-        Comment comment = CommentMapper.toComment(commentDto, item, user);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Comment comment = CommentMapper.toComment(commentDto, item, user, localDateTime);
         log.info("Отзыв добавлен");
         return CommentMapper.toResponseCommentDto(commentRepository.save(comment));
     }
