@@ -51,7 +51,10 @@ public class BookingServiceImpl implements BookingService {
         if (!item.getAvailable()) {
             throw new ValidationException("Вещь не доступна к бронированию");
         }
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().isEqual(bookingDto.getEnd())) {
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new ValidationException("Неверно введены параметры времени бронирования");
+        }
+        if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new ValidationException("Неверно введены параметры времени бронирования");
         }
         Booking booking = BookingMapper.toBooking(bookingDto, item, user);

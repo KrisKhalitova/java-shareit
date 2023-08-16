@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 @ToString
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class UserDto {
 
     private Long id;

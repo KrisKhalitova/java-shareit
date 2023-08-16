@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class ResponseItemDto {
 
     private Long id;

@@ -19,7 +19,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -63,9 +62,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItemById(ItemDto itemDto, Long itemId, Long userId) {
         Item updatedItem = itemRepository.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь не найдена"));
-        User user = userRepository.findById(userId).orElseThrow(() ->
+        userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
-        if (!updatedItem.getOwner().getId().equals(userId) || user == null) {
+        if (!updatedItem.getOwner().getId().equals(userId)) {
             log.warn("Только собственник вещи может изменять информацию");
             throw new NotFoundException("Только собственник вещи может изменять информацию");
         }
@@ -102,7 +101,7 @@ public class ItemServiceImpl implements ItemService {
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException("Пользователь не найден."));
+                new NotFoundException("Вещь не найдена."));
         return item;
     }
 
@@ -119,9 +118,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchItemByText(String text) {
+    public List<ItemDto> searchItemByText(String text) {
         Collection<Item> items = itemRepository.search(text);
-        if (text == null || text.isBlank()) {
+        if (text == null) {
+            return Collections.emptyList();
+        }
+        if (text.isBlank()) {
             return Collections.emptyList();
         }
         return items.stream()
@@ -139,9 +141,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь не найдена"));
-        LocalDateTime now = LocalDateTime.now();
-
-        Comment comment = CommentMapper.toComment(commentDto, item, user, now);
+        Comment comment = CommentMapper.toComment(commentDto, item, user);
         log.info("Отзыв добавлен");
         return CommentMapper.toResponseCommentDto(commentRepository.save(comment));
     }

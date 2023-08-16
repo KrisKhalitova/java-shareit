@@ -12,6 +12,8 @@ import javax.validation.constraints.NotNull;
 @ToString
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
+@NoArgsConstructor
 public class ItemDto {
 
     private long id;
