@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@EqualsAndHashCode
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
