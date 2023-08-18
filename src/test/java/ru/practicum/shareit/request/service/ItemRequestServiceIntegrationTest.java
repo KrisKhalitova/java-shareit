@@ -74,7 +74,7 @@ public class ItemRequestServiceIntegrationTest {
     }
 
     @Test
-    public void getItemRequestById() { //тест по отдельности проходит, а в общем запуске нет
+    public void getItemRequestById() {
         PostItemRequestDto postItemRequestDto = new PostItemRequestDto("description");
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(postItemRequestDto, user2);
         itemRequest.setId(1L);
