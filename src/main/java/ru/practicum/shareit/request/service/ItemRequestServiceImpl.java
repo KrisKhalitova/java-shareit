@@ -18,9 +18,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,11 +47,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(pageable, ownerId);
-        List<ResponseItemRequestDto> requestsDto = new ArrayList<>();
-        for (int i = 0; i < itemRequests.size(); i++) {
-            requestsDto.add(getItemRequestById(itemRequests.get(i).getId(), ownerId));
-        }
-        return requestsDto;
+        return itemRequests.stream().map(itemRequest -> getItemRequestById(itemRequest.getId(), ownerId)).collect(Collectors.toList());
     }
 
     @Override
@@ -61,11 +57,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdNot(pageable, requesterId);
-        List<ResponseItemRequestDto> requestsDto = new ArrayList<>();
-        for (int i = 0; i < itemRequests.size(); i++) {
-            requestsDto.add(getItemRequestById(itemRequests.get(i).getId(), requesterId));
-        }
-        return requestsDto;
+        return itemRequests.stream().map(itemRequest -> getItemRequestById(itemRequest.getId(), requesterId)).collect(Collectors.toList());
     }
 
     @Override

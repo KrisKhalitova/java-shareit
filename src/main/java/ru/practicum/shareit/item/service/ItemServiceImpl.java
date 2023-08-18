@@ -110,11 +110,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
         List<Item> items = new ArrayList<>(itemRepository.findAllByOwner(user, Sort.by(ASC, "id")));
-        List<ResponseItemDto> itemsDto = new ArrayList<>();
-        for (int i = 0; i < items.size(); i++) {
-            itemsDto.add(getItemById(items.get(i).getId(), userId));
-        }
-        return itemsDto;
+        return items.stream().map(item -> getItemById(item.getId(), userId)).collect(toList());
     }
 
     @Override
