@@ -1,11 +1,13 @@
 package ru.practicum.shareit.request.model;
 
 import lombok.*;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,4 +29,6 @@ public class ItemRequest {
     private User requester;
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
+    @Transient
+    private Set<Item> items;
 }

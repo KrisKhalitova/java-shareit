@@ -13,9 +13,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -26,7 +24,7 @@ public class ItemMapperTest {
     private Item item;
     private Booking bookingLast;
     private Booking bookingNext;
-    private List<Item> items = new ArrayList<>();
+    private Set<Item> items = new HashSet<>();
     private final LocalDateTime startLast = LocalDateTime.now().plusDays(3);
     private final LocalDateTime endLast = startLast.plusDays(1);
     private final LocalDateTime startNext = LocalDateTime.now().plusDays(10);
@@ -37,8 +35,8 @@ public class ItemMapperTest {
     @BeforeEach
     void beforeEach() {
         User user = new User(1L, "username", "user@mail.ru");
-        ItemRequest itemRequest = new ItemRequest(1L, "description to request1", user, created);
-        item = new Item(1L, "item1", "description to Item1", true, user, itemRequest);
+        ItemRequest itemRequest = new ItemRequest(1L, "description to request1", user, created, null);
+        item = new Item(1L, "item1", "description to Item1", true, user, itemRequest, null);
         bookingLast = new Booking(1L, startLast, endLast, item, user, BookingStatus.WAITING);
         bookingNext = new Booking(2L, startNext, endNext, item, user, BookingStatus.WAITING);
         comment = new Comment(1L, "text", item, user, created);
@@ -115,5 +113,16 @@ public class ItemMapperTest {
         List<ItemRequestDto> itemItemRequestDtoList = ItemMapper.toItemListForRequestDto(items);
 
         assertNull(itemItemRequestDtoList);
+    }
+
+    @Test
+    void itemToResponseItemDto() {
+        ResponseItemDto responseItemDto = ItemMapper.toResponseItemDtoFromItem(item);
+
+        assertThat(responseItemDto.getId()).isEqualTo(item.getId());
+        assertThat(responseItemDto.getName()).isEqualTo(item.getName());
+        assertThat(responseItemDto.getDescription()).isEqualTo(item.getDescription());
+        assertThat(responseItemDto.getAvailable()).isEqualTo(item.getAvailable());
+        assertThat(responseItemDto.getRequestId()).isEqualTo(item.getItemRequest().getId());
     }
 }

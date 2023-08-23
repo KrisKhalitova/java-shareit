@@ -21,12 +21,13 @@ public class ItemRequestMapperTest {
     private Item item;
     private ResponseItemRequestDto responseItemRequestDto;
     private final LocalDateTime time = LocalDateTime.now().plusDays(1);
+    private List<ResponseItemRequestDto> responseList = new ArrayList<>();
 
     @BeforeEach
     void beforeEach() {
         user = new User(1L, "username", "user@mail.ru");
-        item = new Item(1L, "item", "description to Item", true, user, null);
-        itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time);
+        item = new Item(1L, "item", "description to Item", true, user, null, null);
+        itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time, null);
     }
 
     @Test
@@ -48,15 +49,25 @@ public class ItemRequestMapperTest {
     }
 
     @Test
-    void itemRequestAndListToResponseItemRequestDto() {
-        List<Item> items = new ArrayList<>();
-        items.add(item);
-        item.setItemRequest(itemRequest);
-        responseItemRequestDto = ItemRequestMapper.toResponseItemRequestDto(itemRequest, items);
+    void itemRequestToListResponseItemRequestDto() {
+        responseItemRequestDto = ItemRequestMapper.toResponseItemRequestDto(itemRequest);
+        responseList.add(responseItemRequestDto);
 
-        assertThat(responseItemRequestDto.getDescription()).isEqualTo(itemRequest.getDescription());
-        assertThat(responseItemRequestDto.getCreated()).isEqualTo(itemRequest.getCreated());
-        assertThat(responseItemRequestDto.getRequesterId()).isEqualTo(itemRequest.getRequester().getId());
-        assertThat(responseItemRequestDto.getItems().get(0).getName()).isEqualTo(item.getName());
+        List<ItemRequest> itemRequests = new ArrayList<>();
+        itemRequests.add(itemRequest);
+        List<ResponseItemRequestDto> responseItemsRequestDto = ItemRequestMapper.toListRequestDtoToResponseFromListItemRequest(itemRequests);
+
+        assertThat(responseItemsRequestDto.size()).isEqualTo(1);
+    }
+
+    @Test
+    void itemNullRequestToListResponseItemRequestDto() {
+        responseItemRequestDto = ItemRequestMapper.toResponseItemRequestDto(itemRequest);
+        responseList.add(responseItemRequestDto);
+
+        List<ItemRequest> itemRequests = null;
+        List<ResponseItemRequestDto> responseItemsRequestDto = ItemRequestMapper.toListRequestDtoToResponseFromListItemRequest(itemRequests);
+
+        assertThat(responseItemsRequestDto.isEmpty());
     }
 }

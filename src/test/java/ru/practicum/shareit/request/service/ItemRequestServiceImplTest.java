@@ -8,19 +8,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.PostItemRequestDto;
 import ru.practicum.shareit.request.dto.ResponseItemRequestDto;
+import ru.practicum.shareit.request.dto.ResponseItemRequestListDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,11 +41,15 @@ class ItemRequestServiceImplTest {
     private ItemRequestServiceImpl itemRequestService;
     @Mock
     private ItemRepository itemRepository;
+    @Mock
+    private CommentRepository commentRepository;
     private ItemRequest itemRequest;
     private User user;
     private Item item;
     private final LocalDateTime time = LocalDateTime.now().plusDays(1);
     private PostItemRequestDto postItemRequestDto;
+    private Set<Comment> comments = new HashSet<>();
+    private Comment comment;
 
     @BeforeEach
     void beforeEach() {
@@ -50,9 +58,12 @@ class ItemRequestServiceImplTest {
                 .name("username")
                 .email("user@mail.ru")
                 .build();
-        item = new Item(1L, "item", "description to Item", true, user, null);
-        itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time);
+        itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time, null);
+        item = new Item(1L, "item", "description to Item", true, user, itemRequest, null);
         postItemRequestDto = new PostItemRequestDto("description");
+        comment = new Comment(1L, "textComment", item, user, LocalDateTime.now());
+        comments.add(comment);
+        item.setComments(comments);
     }
 
     @Test
@@ -78,18 +89,17 @@ class ItemRequestServiceImplTest {
     @Test
     void getAllOwnerRequestsTest() {
         Long userId = user.getId();
-        Long requestId = itemRequest.getId();
         item.setItemRequest(itemRequest);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(itemRequestRepository.findById(requestId)).thenReturn(Optional.of(itemRequest));
         when(itemRequestRepository.findAllByRequesterId(any(Pageable.class), anyLong()))
                 .thenReturn(List.of(itemRequest));
+        when(commentRepository.findByItemIdIn(any())).thenReturn(List.of(comment));
 
-        Collection<ResponseItemRequestDto> response = itemRequestService.getAllOwnerRequests(0, 20, userId);
+        ResponseItemRequestListDto response = itemRequestService.getAllOwnerRequests(0, 20, userId);
 
         assertNotNull(response);
-        assertEquals(1, response.size());
+        assertEquals(1, response.getRequests().size());
     }
 
     @Test
@@ -103,18 +113,17 @@ class ItemRequestServiceImplTest {
     @Test
     void getAllRequesterRequestsTest() {
         Long userId = user.getId();
-        Long requestId = itemRequest.getId();
         item.setItemRequest(itemRequest);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(itemRequestRepository.findById(requestId)).thenReturn(Optional.of(itemRequest));
         when(itemRequestRepository.findAllByRequesterIdNot(any(Pageable.class), anyLong()))
                 .thenReturn(List.of(itemRequest));
+        when(commentRepository.findByItemIdIn(any())).thenReturn(List.of(comment));
 
-        Collection<ResponseItemRequestDto> response = itemRequestService.getAllRequesterRequests(0, 20, userId);
+        ResponseItemRequestListDto response = itemRequestService.getAllRequesterRequests(0, 20, userId);
 
         assertNotNull(response);
-        assertEquals(1, response.size());
+        assertEquals(1, response.getRequests().size());
     }
 
     @Test

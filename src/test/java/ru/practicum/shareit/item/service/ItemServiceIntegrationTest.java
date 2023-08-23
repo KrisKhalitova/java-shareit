@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
-import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.dto.ResponseItemListDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.PostItemRequestDto;
@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,9 +102,9 @@ public class ItemServiceIntegrationTest {
         itemRequest.setRequester(user2);
 
         List<ItemDto> expectedItems = List.of(itemDto1, itemDto2);
-        Collection<ResponseItemDto> actualItems = itemService.getAllItemsByUserId(userDto1.getId());
+        ResponseItemListDto actualItems = itemService.getAllItemsByUserId(userDto1.getId(), 0, 20);
 
-        assertEquals(expectedItems.size(), actualItems.size());
-        assertEquals(2, actualItems.size());
+        assertEquals(expectedItems.size(), actualItems.getItems().size());
+        assertEquals(2, actualItems.getItems().size());
     }
 }

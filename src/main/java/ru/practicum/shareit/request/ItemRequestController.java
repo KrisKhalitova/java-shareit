@@ -6,12 +6,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.PostItemRequestDto;
 import ru.practicum.shareit.request.dto.ResponseItemRequestDto;
+import ru.practicum.shareit.request.dto.ResponseItemRequestListDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,17 +33,17 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public Collection<ResponseItemRequestDto> getAllOwnerRequests(@RequestHeader(USER_ID_HEADER) @Positive Long ownerId,
-                                     @RequestParam(defaultValue = DEFAULT_FROM_VALUE) @PositiveOrZero int from,
-                                     @RequestParam(defaultValue = DEFAULT_SIZE_VALUE) @Positive int size) {
+    public ResponseItemRequestListDto getAllOwnerRequests(@RequestHeader(USER_ID_HEADER) @Positive Long ownerId,
+                                                          @RequestParam(defaultValue = DEFAULT_FROM_VALUE) @PositiveOrZero int from,
+                                                          @RequestParam(defaultValue = DEFAULT_SIZE_VALUE) @Positive int size) {
         log.info("Получен запрос на получение всех запросов владельца {}.", ownerId);
         return itemRequestService.getAllOwnerRequests(from, size, ownerId);
     }
 
     @GetMapping("/all")
-    public Collection<ResponseItemRequestDto> getAllRequesterRequests(@RequestHeader(USER_ID_HEADER) @Positive Long requesterId,
-                                      @RequestParam(defaultValue = DEFAULT_FROM_VALUE) @PositiveOrZero int from,
-                                      @RequestParam(defaultValue = DEFAULT_SIZE_VALUE) @Positive int size) {
+    public ResponseItemRequestListDto getAllRequesterRequests(@RequestHeader(USER_ID_HEADER) @Positive Long requesterId,
+                                                              @RequestParam(defaultValue = DEFAULT_FROM_VALUE) @PositiveOrZero int from,
+                                                              @RequestParam(defaultValue = DEFAULT_SIZE_VALUE) @Positive int size) {
         log.info("Получен запрос на получение всех запросов пользователя {}.", requesterId);
         return itemRequestService.getAllRequesterRequests(from, size, requesterId);
     }

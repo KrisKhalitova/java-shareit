@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -22,9 +23,13 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.utils.ShareItPageRequest;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -204,7 +209,6 @@ class ItemServiceImplTest {
         assertThrows(NotFoundException.class, () -> itemService.updateItemById(itemDto, itemId, userId));
     }
 
-
     @Test
     void getItemByIdTest() {
         Booking lastBooking = new Booking();
@@ -270,20 +274,19 @@ class ItemServiceImplTest {
     @Test
     void getAllItemsByUserIdTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.findAllByOwner(any(), any())).thenReturn(List.of(item));
 
-        Collection<ResponseItemDto> response = itemService.getAllItemsByUserId(user1.getId());
+        ResponseItemListDto response = itemService.getAllItemsByUserId(user1.getId(), 0, 20);
 
         assertNotNull(response);
-        assertEquals(1, response.size());
+        assertEquals(1, response.getItems().size());
     }
 
     @Test
     void getAllItemsByWrongUserIdTest() {
         long userId = 25L;
 
-        assertThrows(NotFoundException.class, () -> itemService.getAllItemsByUserId((userId)));
+        assertThrows(NotFoundException.class, () -> itemService.getAllItemsByUserId((userId), 0, 20));
     }
 
     @Test
@@ -291,10 +294,10 @@ class ItemServiceImplTest {
         List<Item> itemList = new ArrayList<>();
         itemList.add(item);
 
-        when(itemRepository.search(anyString())).thenReturn(itemList);
+        when(itemRepository.search(anyString(), any())).thenReturn(itemList);
 
         List<ItemDto> expectedDtoList = List.of(ItemMapper.toItemDto(item));
-        List<ItemDto> actualDtoList = itemService.searchItemByText("text");
+        List<ItemDto> actualDtoList = itemService.searchItemByText("text", 0, 20);
 
         assertEquals(expectedDtoList.get(0).getId(), actualDtoList.get(0).getId());
         assertEquals(expectedDtoList.get(0).getDescription(), actualDtoList.get(0).getDescription());
@@ -304,16 +307,18 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemByNullTextTest() {
-        when(itemRepository.search(null)).thenReturn(Collections.emptyList());
-        List<ItemDto> actualDtoList = itemService.searchItemByText(null);
+        Pageable pageable = new ShareItPageRequest(0, 20);
+        when(itemRepository.search(null, pageable)).thenReturn(Collections.emptyList());
+        List<ItemDto> actualDtoList = itemService.searchItemByText(null, 0, 20);
 
         assertEquals(actualDtoList.size(), 0);
     }
 
     @Test
     void searchItemByBlankTextTest() {
-        when(itemRepository.search("")).thenReturn(Collections.emptyList());
-        List<ItemDto> actualDtoList = itemService.searchItemByText("");
+        Pageable pageable = new ShareItPageRequest(0, 20);
+        when(itemRepository.search("", pageable)).thenReturn(Collections.emptyList());
+        List<ItemDto> actualDtoList = itemService.searchItemByText("", 0, 20);
 
         assertEquals(actualDtoList.size(), 0);
     }

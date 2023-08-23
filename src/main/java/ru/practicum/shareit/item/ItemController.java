@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ResponseCommentDto;
-import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.util.List;
 
 @RestController
 @RequestMapping("/items")
@@ -21,6 +20,8 @@ import java.util.Collection;
 public class ItemController {
     private final ItemService itemService;
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    public static final String DEFAULT_FROM_VALUE = "0";
+    public static final String DEFAULT_SIZE_VALUE = "20";
 
     @PostMapping
     public ItemDto addNewItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(USER_ID_HEADER) Long userId) {
@@ -45,15 +46,23 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ResponseItemDto> getAllItemsByUserId(@RequestHeader(USER_ID_HEADER) Long userId) {
-        Collection<ResponseItemDto> allItemsByUserId = itemService.getAllItemsByUserId(userId);
+    public ResponseItemListDto getAllItemsByUserId(@RequestHeader(USER_ID_HEADER) Long userId,
+                                                   @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                                   @PositiveOrZero int from,
+                                                   @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                                   @Positive int size) {
+        ResponseItemListDto allItemsByUserId = itemService.getAllItemsByUserId(userId, from, size);
         log.info("Запрошен список вещей пользователя с id {}", userId);
         return allItemsByUserId;
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItemByText(@RequestParam String text) {
-        Collection<ItemDto> allItemsByText = itemService.searchItemByText(text.toLowerCase());
+    public List<ItemDto> searchItemByText(@RequestParam String text,
+                                          @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                          @PositiveOrZero int from,
+                                          @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                          @Positive int size) {
+        List<ItemDto> allItemsByText = itemService.searchItemByText(text.toLowerCase(), from, size);
         log.info("Получен список вещей по заданному тексту");
         return allItemsByText;
     }

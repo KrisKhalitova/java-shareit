@@ -14,6 +14,7 @@ import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 import ru.practicum.shareit.request.ItemRequestController;
 import ru.practicum.shareit.request.dto.ResponseItemRequestDto;
+import ru.practicum.shareit.request.dto.ResponseItemRequestListDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.time.LocalDateTime;
@@ -99,8 +100,11 @@ class ItemRequestControllerTest {
 
     @Test
     void getAllOwnerRequestsTest() throws Exception {
-        List<ResponseItemRequestDto> itemRequests = new ArrayList<>();
-        itemRequests.add(responseItemRequestDto);
+        List<ResponseItemRequestDto> itemRequestsDto = new ArrayList<>();
+        itemRequestsDto.add(responseItemRequestDto);
+
+        ResponseItemRequestListDto itemRequests = ResponseItemRequestListDto.builder()
+                .requests(itemRequestsDto).build();
         when(itemRequestService.getAllOwnerRequests(anyInt(), anyInt(), anyLong())).thenReturn(itemRequests);
 
         mvc.perform(get("/requests")
@@ -119,8 +123,12 @@ class ItemRequestControllerTest {
 
     @Test
     void getAllRequesterRequestsTest() throws Exception {
-        List<ResponseItemRequestDto> itemRequests = new ArrayList<>();
-        itemRequests.add(responseItemRequestDto);
+        List<ResponseItemRequestDto> itemRequestsDto = new ArrayList<>();
+        itemRequestsDto.add(responseItemRequestDto);
+
+        ResponseItemRequestListDto itemRequests = ResponseItemRequestListDto.builder()
+                .requests(itemRequestsDto).build();
+
         when(itemRequestService.getAllRequesterRequests(anyInt(), anyInt(), anyLong())).thenReturn(itemRequests);
 
         mvc.perform(get("/requests/all")

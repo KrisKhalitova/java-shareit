@@ -31,7 +31,7 @@ public class BookingMapperTest {
     @BeforeEach
     void beforeEach() {
         user = new User(1L, "username", "user@mail.ru");
-        item = new Item(1L, "item", "description to Item", true, user, null);
+        item = new Item(1L, "item", "description to Item", true, user, null, null);
         booking = new Booking(1L, start, end, item, user, BookingStatus.WAITING);
         userDto = new UserDto(1L, user.getName(), user.getEmail());
         postBookingDto = new PostBookingDto(1L, item.getId(), start, end);

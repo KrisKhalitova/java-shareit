@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ItemMapper {
@@ -65,10 +66,21 @@ public class ItemMapper {
                 .build();
     }
 
-    public static List<ItemRequestDto> toItemListForRequestDto(List<Item> items) {
+    public static List<ItemRequestDto> toItemListForRequestDto(Set<Item> items) {
         if (items == null) {
             return null;
         }
         return items.stream().map(ItemMapper::toItemForRequestDto).collect(Collectors.toList());
+    }
+
+    public static ResponseItemDto toResponseItemDtoFromItem(Item item) {
+        return ResponseItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .owner(item.getOwner())
+                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
+                .build();
     }
 }

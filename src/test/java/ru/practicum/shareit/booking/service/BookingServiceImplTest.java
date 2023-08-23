@@ -58,7 +58,7 @@ class BookingServiceImplTest {
     void beforeEach() {
         user = new User(1L, "username", "user@mail.ru");
         user2 = new User(2L, "username2", "user2@mail.ru");
-        item = new Item(1L, "item", "description to Item", true, user, null);
+        item = new Item(1L, "item", "description to Item", true, user, null, null);
         booking = new Booking(1L, start, end, item, user2, BookingStatus.WAITING);
         postBookingDto = new PostBookingDto(booking.getId(), item.getId(), booking.getStart(), booking.getEnd());
     }
