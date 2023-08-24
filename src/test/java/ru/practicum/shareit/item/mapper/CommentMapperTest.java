@@ -31,7 +31,7 @@ public class CommentMapperTest {
     @BeforeEach
     void beforeEach() {
         user = new User(1L, "username", "user@mail.ru");
-        item = new Item(1L, "item", "description to Item", true, user, null, null);
+        item = new Item(1L, "item", "description to Item", true, user, null);
         comment = new Comment(1L, "text", item, user, created);
         userDto = new UserDto(1L, user.getName(), user.getEmail());
         itemDto = new ItemDto(1L, item.getName(), item.getDescription(), item.getAvailable(), user, item, null);

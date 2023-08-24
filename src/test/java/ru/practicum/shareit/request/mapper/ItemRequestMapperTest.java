@@ -26,7 +26,7 @@ public class ItemRequestMapperTest {
     @BeforeEach
     void beforeEach() {
         user = new User(1L, "username", "user@mail.ru");
-        item = new Item(1L, "item", "description to Item", true, user, null, null);
+        item = new Item(1L, "item", "description to Item", true, user, null);
         itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time, null);
     }
 

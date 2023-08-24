@@ -36,7 +36,7 @@ public class ItemMapperTest {
     void beforeEach() {
         User user = new User(1L, "username", "user@mail.ru");
         ItemRequest itemRequest = new ItemRequest(1L, "description to request1", user, created, null);
-        item = new Item(1L, "item1", "description to Item1", true, user, itemRequest, null);
+        item = new Item(1L, "item1", "description to Item1", true, user, itemRequest);
         bookingLast = new Booking(1L, startLast, endLast, item, user, BookingStatus.WAITING);
         bookingNext = new Booking(2L, startNext, endNext, item, user, BookingStatus.WAITING);
         comment = new Comment(1L, "text", item, user, created);

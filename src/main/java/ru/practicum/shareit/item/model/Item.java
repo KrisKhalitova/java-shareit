@@ -5,7 +5,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -31,6 +30,4 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest itemRequest;
-    @Transient
-    private Set<Comment> comments;
 }

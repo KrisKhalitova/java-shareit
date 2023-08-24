@@ -59,11 +59,10 @@ class ItemRequestServiceImplTest {
                 .email("user@mail.ru")
                 .build();
         itemRequest = new ItemRequest(1L, "descriptionOfItemRequest", user, time, null);
-        item = new Item(1L, "item", "description to Item", true, user, itemRequest, null);
+        item = new Item(1L, "item", "description to Item", true, user, itemRequest);
         postItemRequestDto = new PostItemRequestDto("description");
         comment = new Comment(1L, "textComment", item, user, LocalDateTime.now());
         comments.add(comment);
-        item.setComments(comments);
     }
 
     @Test

@@ -110,7 +110,8 @@ public class ItemServiceImpl implements ItemService {
 
         Pageable pageable = new ShareItPageRequest(from, size, Sort.by(ASC, "id"));
         List<Item> items = itemRepository.findAllByOwner(user, pageable);
-        setComments(items);
+        List<ResponseItemDto> responseItemDtoList = ItemMapper.toResponseItemDtoListFromListOfItems(items);
+        setComments(responseItemDtoList);
         List<ResponseItemDto> personalItems = setBookings(items);
 
         return ResponseItemListDto.builder().items(personalItems).build();
@@ -121,7 +122,8 @@ public class ItemServiceImpl implements ItemService {
         Pageable pageable = new ShareItPageRequest(from, size);
         List<Item> items = itemRepository.search(text, pageable);
         setBookings(items);
-        setComments(items);
+        List<ResponseItemDto> responseItemDtoList = ItemMapper.toResponseItemDtoListFromListOfItems(items);
+        setComments(responseItemDtoList);
         if (text == null) {
             return Collections.emptyList();
         }
@@ -148,22 +150,21 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toResponseCommentDto(commentRepository.save(comment));
     }
 
-    @Transactional
-    public void setComments(List<Item> items) {
-        List<Long> itemIds = items.stream()
-                .map(Item::getId)
+    private void setComments(List<ResponseItemDto> responseItemDtoList) {
+        List<Long> itemIds = responseItemDtoList.stream()
+                .map(ResponseItemDto::getId)
                 .collect(Collectors.toList());
         List<Comment> allComments = commentRepository.findByItemIdIn(itemIds);
         Map<Long, List<Comment>> commentsMap = allComments.stream()
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
-        for (Item item : items) {
+        for (ResponseItemDto item : responseItemDtoList) {
             List<Comment> comments = commentsMap.getOrDefault(item.getId(), Collections.emptyList());
-            item.setComments(new HashSet<>(comments));
+            List<ResponseCommentDto> commentDtoList = CommentMapper.toResponseCommentDtoList(comments);
+            item.setComments(new ArrayList<>(commentDtoList));
         }
     }
 
-    @Transactional
-    public List<ResponseItemDto> setBookings(List<Item> items) {
+    private List<ResponseItemDto> setBookings(List<Item> items) {
         List<ResponseItemDto> personalItems = new ArrayList<>();
         List<Booking> beforeBookings = bookingRepository.findAllByItemIdInAndStartBeforeAndStatusOrderByItemIdAscEndDesc(
                 items.stream().map(Item::getId).collect(Collectors.toList()),

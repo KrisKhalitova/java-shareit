@@ -83,4 +83,11 @@ public class ItemMapper {
                 .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
                 .build();
     }
+
+    public static List<ResponseItemDto> toResponseItemDtoListFromListOfItems(List<Item> items) {
+        if (items == null) {
+            return null;
+        }
+        return items.stream().map(ItemMapper::toResponseItemDtoFromItem).collect(Collectors.toList());
+    }
 }

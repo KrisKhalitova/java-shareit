@@ -6,6 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dto.ResponseCommentDto;
+import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -21,10 +25,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.utils.ShareItPageRequest;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +56,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(pageable, ownerId);
         List<Item> items = itemRepository.findAllByItemRequestIn(itemRequests);
-        setItems(itemRequests, items);
+        List<ResponseItemDto> responseItemDtoList = ItemMapper.toResponseItemDtoListFromListOfItems(items);
+        setItems(itemRequests, items, responseItemDtoList);
 
         return ResponseItemRequestListDto.builder()
                 .requests(ItemRequestMapper.toListRequestDtoToResponseFromListItemRequest(itemRequests)).build();
@@ -69,7 +71,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdNot(pageable, requesterId);
         List<Item> items = itemRepository.findAllByItemRequestIn(itemRequests);
-        setItems(itemRequests, items);
+        List<ResponseItemDto> responseItemDtoList = ItemMapper.toResponseItemDtoListFromListOfItems(items);
+        setItems(itemRequests, items, responseItemDtoList);
 
         return ResponseItemRequestListDto.builder()
                 .requests(ItemRequestMapper.toListRequestDtoToResponseFromListItemRequest(itemRequests)).build();
@@ -82,21 +85,23 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest itemRequest = itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Запрос не найден."));
         List<Item> items = itemRepository.findAllByItemRequest(itemRequest);
-        setItems(List.of(itemRequest), items);
+        List<ResponseItemDto> responseItemDtoList = ItemMapper.toResponseItemDtoListFromListOfItems(items);
+        setItems(List.of(itemRequest), items, responseItemDtoList);
 
         return ItemRequestMapper.toResponseItemRequestDto(itemRequest);
     }
 
-    public void setItems(List<ItemRequest> itemRequests, List<Item> items) {
+    private void setItems(List<ItemRequest> itemRequests, List<Item> items, List<ResponseItemDto> responseItemDtoList) {
         List<Long> itemIds = items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
         List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
         Map<Long, List<Comment>> commentsMap = comments.stream()
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
-        for (Item item : items) {
-            List<Comment> itemComments = commentsMap.getOrDefault(item.getId(), Collections.emptyList());
-            item.setComments(new HashSet<>(itemComments));
+        for (ResponseItemDto responseItemDto : responseItemDtoList) {
+            List<Comment> itemComments = commentsMap.getOrDefault(responseItemDto.getId(), Collections.emptyList());
+            List<ResponseCommentDto> commentDtoList = CommentMapper.toResponseCommentDtoList(itemComments);
+            responseItemDto.setComments(new ArrayList<>(commentDtoList));
         }
         for (ItemRequest itemRequest : itemRequests) {
             List<Item> requestItems = items.stream()
