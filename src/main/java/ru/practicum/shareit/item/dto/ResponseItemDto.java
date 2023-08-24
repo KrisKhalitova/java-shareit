@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class ResponseItemDto {
 
     private Long id;
@@ -21,4 +22,5 @@ public class ResponseItemDto {
     private BookingDtoWithBookers nextBooking;
     private User owner;
     private List<ResponseCommentDto> comments;
+    private Long requestId;
 }

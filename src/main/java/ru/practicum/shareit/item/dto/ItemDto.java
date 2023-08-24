@@ -12,9 +12,11 @@ import javax.validation.constraints.NotNull;
 @ToString
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
+@NoArgsConstructor
 public class ItemDto {
 
-    private long id;
+    private Long id;
     @NotBlank
     private String name;
     @NotBlank
@@ -23,4 +25,5 @@ public class ItemDto {
     private Boolean available;
     private User owner;
     private Item item;
+    private Long requestId;
 }

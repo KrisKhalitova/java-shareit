@@ -14,6 +14,7 @@ public class BookingMapper {
 
     public static Booking toBooking(PostBookingDto postBookingDto, Item item, User booker) {
         return Booking.builder()
+                .id(postBookingDto.getId())
                 .start(postBookingDto.getStart())
                 .end(postBookingDto.getEnd())
                 .item(item)

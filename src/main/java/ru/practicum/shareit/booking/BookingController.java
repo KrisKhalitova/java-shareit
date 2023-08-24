@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.PostBookingDto;
 import ru.practicum.shareit.booking.dto.ResponseBookingDto;
@@ -9,15 +10,20 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class BookingController {
     private final BookingService bookingService;
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    public static final String DEFAULT_FROM_VALUE = "0";
+    public static final String DEFAULT_SIZE_VALUE = "20";
 
     @PostMapping
     public ResponseBookingDto addNewRequestForBooking(@Valid @RequestBody PostBookingDto postBookingDto,
@@ -44,17 +50,24 @@ public class BookingController {
 
     @GetMapping
     public Collection<ResponseBookingDto> getAllBookingsByUserIdByState(@RequestParam(value = "state", defaultValue = "ALL") BookingState state,
-                                                                        @RequestHeader(USER_ID_HEADER) Long userId) {
+                                                                        @RequestHeader(USER_ID_HEADER) Long userId,
+                                                                        @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                                                            @PositiveOrZero Integer from,
+                                                                        @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                                                            @Positive Integer size) {
         log.info("Получен запрос на получение информации по всем бронированиям пользователя с id {} ", userId);
-        Collection<ResponseBookingDto> allBookingsByUserIdByState = bookingService.getAllBookingsByUserIdByState(state, userId);
+        Collection<ResponseBookingDto> allBookingsByUserIdByState = bookingService.getAllBookingsByUserIdByState(state, userId, from, size);
         return allBookingsByUserIdByState;
     }
 
     @GetMapping("/owner")
-    public Collection<ResponseBookingDto> getAllBookingsByOwnerByState(@RequestParam(value = "state", defaultValue = "ALL") BookingState state,
-                                                                       @RequestHeader(USER_ID_HEADER) Long ownerId) {
+    public Collection<ResponseBookingDto> getAllBookingsByOwnerByState(@RequestParam(value = "state", defaultValue = "ALL") BookingState state,@RequestHeader(USER_ID_HEADER) Long ownerId,
+                                                                       @RequestParam(defaultValue = DEFAULT_FROM_VALUE)
+                                                                       @PositiveOrZero Integer from,
+                                                                       @RequestParam(defaultValue = DEFAULT_SIZE_VALUE)
+                                                                           @Positive Integer size) {
         log.info("Получен запрос на получение информации по всем вещам пользователя с id {} ", ownerId);
-        Collection<ResponseBookingDto> bookings = bookingService.getAllBookingsByOwnerByState(state, ownerId);
+        Collection<ResponseBookingDto> bookings = bookingService.getAllBookingsByOwnerByState(state, ownerId, from, size);
         return bookings;
     }
 }
