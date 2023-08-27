@@ -2,24 +2,21 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto createNewUser(@Valid @RequestBody UserDto userDto) {
+    public UserDto createNewUser(@RequestBody UserDto userDto) {
         UserDto user = userService.createNewUser(userDto);
         log.info("Создан новый пользователь");
         return user;
