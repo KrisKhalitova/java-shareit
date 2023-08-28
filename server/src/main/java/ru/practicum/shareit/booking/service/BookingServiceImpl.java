@@ -57,9 +57,9 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDto.getStart().isEqual(bookingDto.getEnd())) {
             throw new ValidationException("Неверно введены параметры времени бронирования");
         }
-        long сount = bookingRepository.countByItemIdAndStatusAndStartBeforeAndEndAfter(
+        long count = bookingRepository.countByItemIdAndStatusAndStartBeforeAndEndAfter(
                 bookingDto.getItemId(), BookingStatus.APPROVED, bookingDto.getEnd(), bookingDto.getStart());
-        if (сount > 0) {
+        if (count > 0) {
             throw new ValidationException("Вещь уже забронирована в данный промежуток времени");
         }
         Booking booking = BookingMapper.toBooking(bookingDto, item, user);
