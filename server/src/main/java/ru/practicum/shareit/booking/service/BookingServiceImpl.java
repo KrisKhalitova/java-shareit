@@ -45,6 +45,11 @@ public class BookingServiceImpl implements BookingService {
                 new NotFoundException("Вещь не найдена"));
         User user = userRepository.findById(bookerId).orElseThrow(() ->
                 new NotFoundException("Пользователь не найден"));
+        long count = bookingRepository.countByItemIdAndStatusAndStartBeforeAndEndAfter(
+                bookingDto.getItemId(), BookingStatus.APPROVED, bookingDto.getEnd(), bookingDto.getStart());
+        if (count > 0) {
+            throw new ValidationException("Вещь уже забронирована на данный промежуток времени.");
+        }
         if (item.getOwner().getId().equals(bookerId)) {
             throw new NotFoundException("Id владельца и пользователя не могут совпадать");
         }
